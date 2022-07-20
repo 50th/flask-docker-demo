@@ -1,61 +1,48 @@
 # docker demo
 
-这是一个使用 docker 部署 flask 服务的示例代码
+一个使用 docker 部署 flask 服务的示例
 
-## 结构说明
+## 项目结构说明
 
-涉及模块：
+nginx 做反向代理，gunicorn 启动 flask，flask 连接 mysql
 
-- nginx
-- gunicorn
-- flask
-- mysql
+### 镜像
 
-使用 nginx 做反向代理，gunicorn 启动 flask，flask 连接 mysql
+- nginx:1.21.3
+- mysql:8
+- flask_app(以 python 镜像为基础构建的项目镜像)
 
 ### docker 版本：
 
 - Docker version 20.10.9
 - Docker Compose version v2.0.1
 
-## [nginx 配置](docker_volumes/nginx/conf/nginx.conf)
+## 镜像说明
+
+### nginx
 
 1. 处理前端页面及静态文件请求；
 2. 代理 flask 的后端服务；
+3. [nginx 配置](docker_volumes/nginx/conf/nginx.conf)
 
-## mysql 配置
+### mysql
 
 1. 将数据库结构和初始数据导出为 sql 脚本，启动 mysql 容器时指定执行 mysql 初始化脚本
 2. 数据库配置
+3. [mysql 配置](docker_volumes/mysql/my.cnf)
 
-```conf
-[mysqld]
-user=mysql
-character-set-server=utf8
-default_authentication_plugin=mysql_native_password
-lower_case_table_names=1
-secure_file_priv=/var/lib/mysql
-table_definition_cache=400
+### flask_app
 
-[client]
-default-character-set=utf8
-
-[mysql]
-default-character-set=utf8
-```
-
-## flask_app 镜像
-
-### 镜像构建方式
+#### 镜像构建方式
 
 构建 flask app 的镜像一般有两种方式：
 
 1. 直接以 python 镜像为基础，创建容器，再在容器中部署完成，最后导出为镜像；
-2. 使用[Dockerfile](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)直接构建镜像；
+2. 使用[Dockerfile](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)构建镜像；
 
-第一种比较麻烦，并且每次更新代码都需要重新手动构建镜像，因此使用`Dockerfile`更加方便；
+_第一种比较麻烦，并且每次更新代码都需要重新手动构建镜像，因此使用`Dockerfile`方式_
 
-### gunicorn 配置
+#### gunicorn 配置
 
 ```python
 import multiprocessing
@@ -71,11 +58,12 @@ timeout = 500
 errorlog = './log/gunicorn_error.log'
 ```
 
-### 启动脚本
+#### 启动脚本
 
-start.sh 在容器启动时运行，使用 gunicorn 来启动 flask_app
+`start.sh`在容器启动时运行，使用`gunicorn`启动 flask_app
 
-_由于在`Dockerfile`中配置了`WORKDIR`，因此`start.sh`的执行环境默认就是在`WORKDIR`下_
+1. _由于在`Dockerfile`中配置了`WORKDIR`，因此`start.sh`的执行环境默认就在`WORKDIR`下_
+2. _需要注意`start.sh`的换行符，需要设置为`LF`_
 
 ```shell
 #!/bin/bash
@@ -88,7 +76,7 @@ gunicorn -c gun.conf app:app --daemon
 
 ```
 
-### Dockerfile 配置
+#### Dockerfile 配置文件
 
 ```Dockerfile
 # python 基础镜像版本
@@ -116,21 +104,19 @@ ENTRYPOINT ["./start.sh"]
 
 ```
 
-### 构建镜像
+#### 构建镜像
 
-执行构建命令时，需要确认目录是否正确
-
-```
---- flask_app
-    --- Dockerfile
-    --- start.sh
-    --- app.py
-    --- gun.py
-    --- requirements.txt
-    --- ... 其他项目文件
-```
-
-在 flask_app 目录下执行`docker build -t flask_app .`来创建 docker 镜像
+1. 执行构建命令时，将项目文件放入`flask_app`目录下，目录结构如下：
+   ```
+   --- flask_app
+       --- Dockerfile
+       --- start.sh
+       --- app.py
+       --- gun.py
+       --- requirements.txt
+       --- ... 其他项目文件
+   ```
+2. 在`flask_app`目录下执行`docker build -t flask_app .`命令创建镜像
 
 ## 使用 docker-compose
 
@@ -217,20 +203,18 @@ networks:
 
 ### 启动
 
-#### 目录结构
-
-```
---- docker
-    --- docker-compose.yml
-    --- docker_volumes
-        --- mysql
-            --- init
-                --- init.sql  # 数据库初始化
-            --- my.cnf  # mysql 配置
-        --- nginx
-            --- cert  # nginx 证书
-            --- conf
-                --- nginx.conf  # nginx 配置文件
-```
-
-在`docker-compose.yml`同级目录下执行`docker-compose up -d`
+1. 目录结构
+   ```
+   --- docker_demo
+       --- docker-compose.yml
+       --- docker_volumes
+           --- mysql
+               --- init
+                   --- init.sql  # 数据库初始化
+               --- my.cnf  # mysql 配置
+           --- nginx
+               --- cert  # nginx 证书
+               --- conf
+                   --- nginx.conf  # nginx 配置文件
+   ```
+2. 在`docker-compose.yml`同级目录下执行`docker-compose up -d`
