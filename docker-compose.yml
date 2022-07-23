@@ -46,7 +46,7 @@ services:
         ipv4_address: 172.16.238.7
 
   flask_app:
-    image: flask_app
+    image: flask_app:0.0.1
     container_name: flask_app
     restart: always
     tty: true

@@ -14,7 +14,7 @@ RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list &&  \
 
 # 安装环境
 RUN chmod +x start.sh \
-    && apt-get install -y -q -o Acquire::http::Pipeline-Depth=0 gcc \
+    && apt-get install -y -q -o Acquire::http::Pipeline-Depth=0 python3-dev default-libmysqlclient-dev build-essential\
     && apt-get clean \
     && pip3 install -r requirements.txt -i https://pypi.douban.com/simple
 
