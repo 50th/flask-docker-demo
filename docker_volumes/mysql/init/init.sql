@@ -1,7 +1,7 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE flask_app;
+CREATE DATABASE flask_app;
 USE flask_app;
 
 -- ----------------------------

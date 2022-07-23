@@ -116,7 +116,7 @@ ENTRYPOINT ["./start.sh"]
        --- requirements.txt
        --- ... 其他项目文件
    ```
-2. 在`flask_app`目录下执行`docker build -t flask_app .`命令创建镜像
+2. 在`flask_app`目录下执行`docker build -t flask_app:0.0.1 .`命令创建镜像
 
 ## 使用 docker-compose
 

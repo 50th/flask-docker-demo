@@ -15,15 +15,15 @@ services:
       - 'MYSQL_ROOT_PASSWORD=1234'
       # 设置时区
       - 'TZ=Asia/Shanghai'
-    ports:
+    # ports:
       # 映射端口，如果不用外部访问可以不配置
-      - 3306:3306
+      # - 3306:3306
     logging:
       driver: 'json-file'
       options:
         max-size: '100m'
     networks:
-      flask_app_net:
+      docker_demo_net:
         ipv4_address: 172.16.238.3
 
   nginx:
@@ -42,7 +42,7 @@ services:
       options:
         max-size: '100m'
     networks:
-      flask_app_net:
+      docker_demo_net:
         ipv4_address: 172.16.238.7
 
   flask_app:
@@ -52,7 +52,7 @@ services:
     tty: true
     environment:
       - 'TZ=Asia/Shanghai'
-    volumes: # 挂载目录
+    # volumes: # 挂载目录
     logging:
       driver: 'json-file'
       options:
@@ -60,13 +60,12 @@ services:
     depends_on:
       - mysql
     networks:
-      flask_app_net:
+      docker_demo_net:
         ipv4_address: 172.16.238.10
 
 # 创建一个虚拟网络，固定每个容器的 ip
 networks:
-  flask-app-net:
-    name: flask_app_net
+  docker_demo_net:
     ipam:
       driver: default
       config:
